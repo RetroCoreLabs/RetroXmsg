@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    RetroXmsg.Hub: a virtual Ethernet segment, as its own process.
+
+    It is deliberately NOT part of an emulated machine and NOT part of RetroCore. A machine
+    emulates hardware; a hub is the wire between machines, and several machines in separate
+    processes share one. It lives here because it belongs to the COSMOS networking work and moves
+    with it into RetroFS.
+
+    It speaks the same wire format as the machines' TCP Ethernet transport - a 5-byte "RETH" hello
+    and a big-endian 2-byte length before each frame - so an existing machine joins with no change
+    at all. It therefore needs NO reference to RetroIO.Protocols.Xmsg.Ethernet: the framing is 20 lines and copying a
+    dependency on the whole backend library to avoid them would be the wrong trade. If the framing
+    ever moves into a shared type, this project takes the reference instead.
+  -->
+  <PropertyGroup>
+    <AssemblyName>xmsghub</AssemblyName>
+    <RootNamespace>RetroXmsg.Hub</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>

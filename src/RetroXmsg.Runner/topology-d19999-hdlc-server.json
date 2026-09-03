@@ -1,0 +1,52 @@
+{
+  // D19999 ON THE HDLC SEAM, WITH OUR FILE SERVER TURNED ON.
+  //
+  // WHY THIS FILE EXISTS. Two configs already covered one half each and neither
+  // covered both:
+  //
+  //   topology.json            the HDLC seam to D100, but NO fileServer - so we
+  //                            can push and pull as a CLIENT and D100 can never
+  //                            address us;
+  //   topology-d19999.json     a fileServer, but the ETHERNET path - it sits
+  //                            printing "still waiting for 100 ... NOTHING at
+  //                            all is arriving", which is true and useless when
+  //                            the machine is on HDLC.
+  //
+  // WHAT IT IS FOR. After an XMSG restart on D100 the system entry for 19999 is
+  // dead, and it only wakes when the PEER addresses US - originating from our
+  // side never clears it, and --announce-restart is refused. The one command
+  // that does it is run ON D100:
+  //
+  //     @COPY-FILE "WOKE:TXT",D19999(SYSTEM)."WAKE:TXT"
+  //
+  // which needs a file server listening on this seam. Hence this config.
+  "self": 19999,
+
+  "motd": "D19999 seam server - HDLC, file server on",
+
+  "tadUsers": [
+    { "username": "system", "password": "system" },
+    { "username": "ronny",  "password": "" }
+  ],
+
+  "log": {
+    "enabled": true,
+    "level": "info",
+    "file": "xmsg-runner-seam.log",
+    "maxSizeMb": 2,
+    "keep": 3
+  },
+
+  "listen": { "host": "0.0.0.0", "port": 10403 },
+
+  // The folder we serve. A file D100 writes here arrives as an ordinary file.
+  "fileServer": {
+    "enabled": true,
+    "root": "served-files"
+  },
+
+  "nodes": [
+    { "id": 100, "alias": "d100", "reach": "neighbour", "link": 1, "tcp": { "host": "127.0.0.1", "port": 10362 } },
+    { "id": 19999, "alias": "d19999", "reach": "local" }
+  ]
+}

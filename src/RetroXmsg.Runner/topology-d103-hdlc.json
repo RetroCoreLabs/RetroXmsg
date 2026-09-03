@@ -1,0 +1,76 @@
+{
+  // D103 over HDLC - the TRANSPORT A/B TEST against topology-d19999.json.
+  //
+  // Run it with:   Xmsg.Live.Runner --config topology-d103-hdlc.json
+  //
+  // WHY THIS FILE EXISTS. File access from D100 reaches our node, D100 acknowledges every frame we
+  // send, and then its file-access layer refuses the session with
+  //     FILE-ACCESS INTERNAL ERROR; CALL NOT VALID IN CURRENT STATE
+  // reproducibly, on freshly restarted machines. Everything we can check against a real server -
+  // the connect confirmation's message type, its echoed word, the session port - is now
+  // byte-correct, so the remaining fault is unexplained. This file runs the SAME upper stack over
+  // a COMPLETELY DIFFERENT transport to split the possibilities in two:
+  //
+  //   fails the same way over HDLC  -> the fault is ABOVE the transport, in XMSG or file access,
+  //                                    and the Ethernet controller is exonerated
+  //   works over HDLC               -> the fault is IN the Ethernet path (our NdLinkLayer /
+  //                                    EthernetLink, or the emulated card)
+  //
+  // That is only a valid experiment because the seam makes it one: the codec, the node, the
+  // servers and the file server are IDENTICAL on both paths - the only thing that changes is the
+  // ILink implementation underneath. Nothing above the link knows which transport carried it, and
+  // the wire evidence agrees (the SINTRAN header and its word-6 checksum were verified
+  // transport-independent).
+  //
+  // WHY D103 AND NOT D19999. D100's XMSG configuration routes D19999 over the Ethernet network
+  // server with
+  //     DEF-NETWORK-CONN D19999 ENNS0,,0,0,0,0
+  // so datagrams for D19999 go out of the Ethernet card whatever we do at this end. D103 is
+  // defined on D100 as a remote name but has NO DEF-NETWORK-CONN, so it is reached over the HDLC
+  // link instead. Taking D103's identity is therefore the way to be reached over HDLC without
+  // reconfiguring D100. The alternative is to restart XMSG and omit the D19999 network connection.
+  //
+  // D103 is a real machine in this setup (HDLC-routed through D100, for routing tests) but is NOT
+  // running, so its line is free. Do not run both at once.
+
+  "self": 103,
+
+  "motd": "NDInsight C# node - D103 over HDLC",
+
+  "tadUsers": [
+    { "username": "system", "password": "system" },
+    { "username": "ronny",  "password": "" }
+  ],
+
+  // Same served folder as the Ethernet run, deliberately: the experiment must change the transport
+  // and NOTHING else, or a difference in the result would not mean what we want it to mean.
+  "fileServer": {
+    "enabled": true,
+    "root": "served-files",
+    "userIndex": 0
+  },
+
+  "log": {
+    "enabled": true,
+    "level": "info",
+    "file": "xmsg-d103-hdlc.log",
+    "maxSizeMb": 2,
+    "keep": 3
+  },
+
+  "nodes": [
+    // D100 - our HDLC neighbour. Port 10364 is D100's  device add HDLC 2 --listen=10364 , which is
+    // free: D102 holds HDLC 1 on 10362 (its ini says  device add HDLC 1 --connect=localhost:10362 ).
+    //
+    // NOTE there is NO "ethernet" block anywhere in this file. That is what selects the HDLC path:
+    // the runner takes the Ethernet route only when the topology has an Ethernet peer
+    // (Program.cs, PrimaryEthernetPeer), and falls through to the LAPB/HDLC seam otherwise.
+    { "id": 100, "alias": "d100", "reach": "neighbour", "link": 1, "tcp": { "host": "127.0.0.1", "port": 10364 } },
+
+    // Us.
+    { "id": 103, "alias": "d103", "reach": "local" },
+
+    // Reached through D100.
+    { "id": 102, "alias": "d102", "reach": "via", "via": [ 100 ] }
+  ]
+}

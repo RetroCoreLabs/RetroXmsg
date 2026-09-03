@@ -1,0 +1,71 @@
+{
+  // D19999 on the COSMOS Ethernet segment, aimed at D102.
+  //
+  // WHY THIS FILE EXISTS SEPARATELY FROM topology-d19999.json. A runner is ONE LINK: one
+  // XmsgNodeHost serves one peer, and it picks the FIRST Ethernet neighbour in this list. The
+  // main file lists D100 first, so it can only ever serve D100. To carry a file to D102 the
+  // neighbour list has to start with D102, and that is the whole difference between the two
+  // files.
+  //
+  // 19999 and not 19998: the machines know 19999. LIST-NAMES on D100 shows rows for 101, 102,
+  // 103, 200 and 19999 and NO 19998, so a different number would need DEF-REMOTE and
+  // DEF-NETWORK-CONN adding on every machine and in every boot file first.
+  //
+  // ONLY ONE RUNNER MAY HOLD 19999 AT A TIME. The peer keeps a single sequence counter per
+  // system number, so two processes sharing the number leave one of them permanently behind -
+  // whereupon the machine acknowledges its frames at the link layer and answers nothing above
+  // it, which reads exactly like a dead file server. Check for a running Xmsg.Live.Runner before
+  // starting this.
+
+  "self": 19999,
+
+  "motd": "NDInsight C# node - D19999, aimed at D102",
+
+  "log": {
+    "enabled": true,
+    "level": "info",
+    "file": "xmsg-d19999-d102.log",
+    "maxSizeMb": 2,
+    "keep": 3
+  },
+
+  "nodes": [
+    // Us, joining the TCP hub the machines are on:
+    //     xmsghub.exe --port 5010
+    //     device add ETH 0 --net=tcp:127.0.0.1:5010
+    {
+      "id": 19999,
+      "alias": "d19999",
+      "reach": "local",
+      "transport": "ethernet",
+      "ethernet": { "net": "tcp", "host": "127.0.0.1", "port": 5010 }
+    },
+
+    // D102 FIRST, because the first Ethernet neighbour is the one that gets served.
+    {
+      "id": 102,
+      "alias": "d102",
+      "reach": "neighbour",
+      "link": 1,
+      "transport": "ethernet"
+    },
+
+    // D100 is on the same segment but is NOT served by this file - use topology-d19999.json
+    // for that. Listed so its routing is known rather than absent.
+    {
+      "id": 100,
+      "alias": "d100",
+      "reach": "neighbour",
+      "link": 2,
+      "transport": "ethernet"
+    },
+
+    // D103 is HDLC-only, on a line to D100, so it is reached through D100.
+    {
+      "id": 103,
+      "alias": "d103",
+      "reach": "via",
+      "via": [ 100 ]
+    }
+  ]
+}

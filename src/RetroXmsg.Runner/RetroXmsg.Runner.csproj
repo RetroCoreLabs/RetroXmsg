@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>xmsgrunner</AssemblyName>
+    <RootNamespace>RetroXmsg.Runner</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>1.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      The topology types are internal to this exe. The test project needs them so the ROUTING
+      decision - which link a datagram leaves by - can be tested rather than reasoned about.
+    -->
+    <InternalsVisibleTo Include="RetroXmsg.Runner.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RetroIO.Protocols.Xmsg" />
+    <PackageReference Include="RetroIO.Protocols.Xmsg.Hdlc" />
+    <PackageReference Include="RetroIO.Protocols.Xmsg.Live" />
+    <PackageReference Include="RetroIO.Protocols.Xmsg.Servers" />
+    <PackageReference Include="RetroIO.Protocols.Xmsg.Diagnostics" />
+    <!-- SintranFileName: turning a Windows file name into a SINTRAN one for the push option. The
+         rule is narrow (16-character name, 4-character type, dot becomes colon) and lives in one
+         place rather than being repeated here. -->
+    <PackageReference Include="RetroIO.Protocols.Xmsg.Sync" />
+    <!-- XftraRequests: the APPEND-REMOTE-BATCH letter is built from the API model. -->
+    <PackageReference Include="RetroIO.Protocols.Xmsg.Api" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The checked-in topology is the source of truth; copy it next to the exe so the default
+         run (with no config override) finds it right beside the executable. -->
+    <None Include="topology.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- The D19999 topology was being hand-copied into bin; that is how a live run ends up on a
+         stale config. Copy it like the default one so the "config" option always finds the
+         checked-in file. -->
+    <None Include="topology-d19999.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

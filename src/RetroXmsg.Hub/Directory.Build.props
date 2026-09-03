@@ -1,0 +1,14 @@
+<Project>
+  <!-- Family props for projects that came from the xmsg tree. Imports the repo props first. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <!--
+    The 2026-08-04 header/sub-header boundary correction left a deliberate set of [Obsolete]
+    compatibility views in the XMSG protocol library. Every project sets TreatWarningsAsErrors, so
+    the obsolete-use warnings would break the build outright. They are demoted to WARNINGS - still
+    visible, so `dotnet build` prints a live worklist of what has yet to migrate off the facade.
+    Do NOT change this to NoWarn: that would hide the worklist. Remove once the last CS0618 is gone.
+  -->
+  <PropertyGroup>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);CS0618;CS0612</WarningsNotAsErrors>
+  </PropertyGroup>
+</Project>

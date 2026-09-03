@@ -1,0 +1,45 @@
+{
+  // Runner network topology, written from THIS runner's own ("self") perspective.
+  // Loaded at startup from next to the exe; override the path with:  --config <path>
+  // Override the self node for one run with:  --self <id|alias>   (or the positional node arg)
+
+  "self": 102,
+
+  // TAD login-banner middle line (replaces the stock "SINTRAN III - VSX/500"). Remove or blank it to
+  // fall back to the built-in "Emulated TAD server version vN.N.N". The date/time line and the
+  // "--- HOST ID:nnn ---" line are always generated (nnn = "self" above). Kept short (<= 64 chars) so
+  // the banner stays inside one terminal frame.
+  "motd": "Emulated TAD server version v0.0.1",
+
+  // TAD login accounts. An empty (or missing) password means the account is passwordless - login logs
+  // straight in after the username, skipping the "PASSWORD:" prompt. Usernames are case-insensitive.
+  // Remove this section to fall back to a single system/system account.
+  "tadUsers": [
+    { "username": "system", "password": "system" },
+    { "username": "ronny",  "password": "" }
+  ],
+
+  // Log file + Linux-syslog rotation. A restart immediately rotates and starts a fresh empty file;
+  // the live file also rotates once it passes maxSizeMb. "keep" archived versions (.1 .2 .3) are
+  // retained, older ones deleted. Set "enabled": false or "level": "off" to disable file logging.
+  "log": {
+    "enabled": true,
+    "level": "info",
+    "file": "xmsg-runner.log",
+    "maxSizeMb": 2,
+    "keep": 3
+  },
+
+  // Reserved for the planned HUB mode: the port neighbours dial to reach US (we LISTEN, not connect out).
+  // Not yet active — the accept loop / multi-link forwarding is a follow-up.
+  "listen": { "host": "0.0.0.0", "port": 10402 },
+
+  // Every known node: id, human alias, how it is reached FROM self, and (optionally) the TCP bridge
+  // endpoint we could dial for a direct connection. Hop counts are DERIVED, never entered:
+  //   local = 0 hops (this is us), neighbour = 1 hop (direct HDLC link), via = via-chain length + 1.
+  "nodes": [
+    { "id": 100, "alias": "d100", "reach": "neighbour", "link": 1, "tcp": { "host": "127.0.0.1", "port": 10362 } },
+    { "id": 102, "alias": "d102", "reach": "local" },
+    { "id": 103, "alias": "d103", "reach": "via", "via": [ 100 ] }
+  ]
+}

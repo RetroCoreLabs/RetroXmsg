@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>RetroXmsg.Runner.Tests</AssemblyName>
+    <RootNamespace>RetroXmsg.Runner.Tests</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      The runner is an exe, and its topology types are internal. Referencing the project and
+      granting internals access is what lets the ROUTING logic be tested at all - it decides which
+      link a datagram leaves by, and untested routing in the one program that talks to real
+      hardware is not something this project accepts.
+    -->
+    <ProjectReference Include="..\..\src\RetroXmsg.Runner\RetroXmsg.Runner.csproj" />
+  </ItemGroup>
+
+</Project>

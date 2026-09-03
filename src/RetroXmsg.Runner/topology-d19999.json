@@ -1,0 +1,123 @@
+{
+  // D19999 - the C# node, on the COSMOS Ethernet segment with D100 and D102.
+  // Run it with:   Xmsg.Live.Runner --config topology-d19999.json
+  //
+  // Why 19999 and not 9999: SINTRAN rejected 9999 with "Virtual system number not allowed" when
+  // it was defined with  X-C:DEF-REMOTE,,D9999 9999.  Where the boundary between a "virtual" and
+  // an ordinary system number lies is UNKNOWN - 19999 was accepted, 9999 was not, and nothing in
+  // the manuals here explains the rule. Do not assume any other number is safe without trying it.
+  //
+  // Our station address is derived, never configured: 08:00:26 | system number BYTE-REVERSED |
+  // physical user. 19999 = 0x4E1F, so the MAC is 08:00:26:1F:4E:00. Note the reversal - in the
+  // SINTRAN header the same number is big-endian (4E 1F). Every node captured before this one was
+  // numbered under 256, which hid the difference.
+
+  "self": 19999,
+
+  "motd": "NDInsight C# node - D19999",
+
+  "tadUsers": [
+    { "username": "system", "password": "system" },
+    { "username": "ronny",  "password": "" }
+  ],
+
+  // The COSMOS file server, *FA-SERVER. "root" is an ordinary Windows folder; its files are what a
+  // remote machine sees when it lists this node's directory. A relative path lands next to the
+  // executable, an absolute one is used as given, and the folder is created if it is missing.
+  //
+  // WITH NO "root" THE FILE SERVER DOES NOT RUN, and the runner says so in one line at startup.
+  // There is no default folder on purpose: defaulting to the directory beside the runner would put
+  // its own logs, state files and DLLs on the network to anyone who asked. Sharing is an explicit act.
+  //
+  // What it can actually answer today: the opening reserve/release of a conversation, and a
+  // directory walk (LIST-FILES). Everything else - open, read, write, create, delete - is answered
+  // with a refusal, because those request layouts have NEVER been captured and guessing at them
+  // would produce confident wrongness. A refusal is still an answer: a request that gets NO reply
+  // wedges the calling SINTRAN terminal, which was watched happening on D100 on 2026-08-02.
+  //
+  // The 64-byte directory records are SYNTHESISED from Windows file facts (name, type, length,
+  // modification time). A Windows folder does not hold a real SINTRAN object entry - see
+  // DOC/PLAN-CSHARP-FILE-SERVER-AND-FOLDER-SYNC-2026-08-01.md section 1.
+  "fileServer": {
+    "enabled": true,
+    "root": "served-files",
+
+    // The owning user stamped into each synthesised entry. There is no real user directory behind a
+    // Windows folder, so this is simply who we present the files as belonging to.
+    "userIndex": 0
+  },
+
+  "log": {
+    "enabled": true,
+    "level": "info",
+    "file": "xmsg-d19999.log",
+    "maxSizeMb": 2,
+    "keep": 3
+  },
+
+  "nodes": [
+    // Us. The "ethernet" block here is how WE join the segment; it must match what the ND
+    // machines use. D103 runs "device add ETH 0 --net=udp", which is multicast 239.3.9.4:3094.
+    //
+    // A C# process CAN observe this traffic even with every node on one host: the backend joins
+    // the group and turns multicast loopback on. What cannot see it is Wireshark/npcap, because
+    // host-local multicast never reaches a real adapter. "Not capturable" is not "not observable".
+    {
+      "id": 19999,
+      "alias": "d19999",
+      "reach": "local",
+      "transport": "ethernet",
+
+      // TCP HUB (use this for protocol carving). One RetroCore process runs the hub with
+      //     net hub 5010
+      // and every machine joins it with
+      //     device add ETH 0 --net=tcp:127.0.0.1:5010
+      // A hub is what lets a third node sit on the segment and observe, which a point-to-point
+      // TCP pair cannot do - and host-local traffic is not capturable with Wireshark here,
+      // because npcap has no loopback adapter installed on this machine.
+      "ethernet": { "net": "tcp", "host": "127.0.0.1", "port": 5010 }
+
+      // UDP multicast (the previous setting). Proven to deliver byte-for-byte - d100 TX
+      // 251 packets / 17082 bytes equalled d102 RX exactly, both directions - so it was never
+      // the cause of the Ethernet failure. Kept here because it needs no hub process.
+      // "ethernet": { "net": "udp", "group": "239.3.9.4", "port": 3094 }
+    },
+
+    // D100 - the hub. It carries the HDLC lines to D102 and D103, so anything we send to D103
+    // has to be relayed by D100.
+    //
+    // NOTE its RetroCore.ini currently says  device add ETH 0 --net=listen:5010  and D102 says
+    // --net=tcp:127.0.0.1:5010, which is a PRIVATE PAIR, not the multicast segment. Until those
+    // two are moved to --net=udp they cannot see us and we cannot see them. That change is on the
+    // machine side, not here.
+    {
+      "id": 100,
+      "alias": "d100",
+      "reach": "neighbour",
+      "link": 1,
+      "transport": "ethernet"
+    },
+
+    // D102 - also on the segment. We can only run ONE link at a time today (one XmsgNodeHost is
+    // one link), so the runner picks the first Ethernet neighbour, which is D100. Serving D100 and
+    // D102 at once needs a host per link: each peer is a separate link with its own learned link id
+    // and its own datagram sequence, so it is not just a matter of listening wider.
+    {
+      "id": 102,
+      "alias": "d102",
+      "reach": "neighbour",
+      "link": 2,
+      "transport": "ethernet"
+    },
+
+    // D103 - HDLC-only, on a line to D100. It reaches us, and we reach it, ONLY through D100.
+    // This is the route-through case, and a relayed datagram crossing HDLC to Ethernet is a frame
+    // nobody has ever captured (COSMOS-ETHERNET-TRANSPORT-FRAMING-2026-08-01.md lists it as open).
+    {
+      "id": 103,
+      "alias": "d103",
+      "reach": "via",
+      "via": [ 100 ]
+    }
+  ]
+}

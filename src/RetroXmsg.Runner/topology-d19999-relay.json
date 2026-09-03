@@ -1,0 +1,73 @@
+{
+  // D19999 as a REAL RELAY between D100 and D103, both over HDLC. Run it with:
+  //
+  //   Xmsg.Live.Runner --config topology-d19999-relay.json \
+  //                    --relay-listen 10366 --relay-inbound-node 103 127.0.0.1 10364 19999 <seconds>
+  //
+  // WHY THIS FILE EXISTS, and why topology-d19999.json is WRONG for a relay.
+  //
+  // That file describes the older Ethernet arrangement, where D103 was HDLC-only behind D100 and
+  // therefore  "reach": "via", "via": [100] . Run as a relay, that line is a lie: D103 is on the
+  // far end of OUR OWN inbound HDLC line. The lie is not harmless - we advertise it, and on
+  // 2026-08-08 D100's LIST-ROUTING-INFO answered
+  //
+  //     103  L: *->19999->103
+  //          T: *->19999->100->19999->100->19999->100->... *Loop suspected*
+  //          A: *->19999->100->19999->100->19999->100->... *Loop suspected*
+  //
+  // D100's own local table had the right answer; the looping one is the path built from what WE
+  // told it. Forwarding was already correct - the runner logged "inbound link on 10366 reaches
+  // [103], outbound to 127.0.0.1:10364 reaches [100]" - so the fault was purely in the advertised
+  // route, which is read from this topology.
+  //
+  // THE ADJACENCY RULE (COSMOS Operator Guide ND-30.025.02, section 2.5.4): a system on the far end
+  // of your own cable is ADJACENT and needs no route. Both peers are adjacent to us here, so both
+  // are "neighbour" and NEITHER has a "via". The same rule applied on the ND machines is what made
+  // D103 reach us at all - see DOC/SUBTYPE-17-INIT-REJECT-2026-08-07.md steps 7 and 8.
+  //
+  // NOTE there is deliberately NO "ethernet" block in this file. The runner takes the Ethernet path
+  // whenever the topology has an Ethernet peer (Program.cs, PrimaryEthernetPeer) and falls through
+  // to the LAPB/HDLC seam otherwise. A relay wants HDLC on both sides.
+
+  "self": 19999,
+
+  "motd": "NDInsight C# node - D19999 relay",
+
+  "tadUsers": [
+    { "username": "system", "password": "system" },
+    { "username": "ronny",  "password": "" }
+  ],
+
+  "fileServer": {
+    "enabled": true,
+    "root": "served-files",
+    "userIndex": 0
+  },
+
+  "log": {
+    "enabled": true,
+    "level": "info",
+    "file": "xmsg-d19999-relay.log",
+    "maxSizeMb": 2,
+    "keep": 3
+  },
+
+  "nodes": [
+    // Us.
+    { "id": 19999, "alias": "d19999", "reach": "local" },
+
+    // D100, on our OUTBOUND line. We dial its HDLC controller 1.
+    //
+    // 10364 is HDLC 1 only because its RetroCore.ini was changed on 2026-08-08 to swap the two
+    // listen ports. SINTRAN on D100 has exactly ONE link LU - 1360 - and START-LINK,1364 is refused
+    // with "Illegal/Reserved LUN", so LU 1360 always means controller 1 and only controller 1's
+    // port can carry an XMSG link. D102 dials 10362, so while HDLC 1 sat there D102 owned the only
+    // usable line and we were a second, ignored client on its socket. Restore the ini to give the
+    // line back to D102.
+    { "id": 100, "alias": "d100", "reach": "neighbour", "link": 1, "tcp": { "host": "127.0.0.1", "port": 10364 } },
+
+    // D103, on our INBOUND line - D103 dials us (its ini: device add HDLC 1 --connect=localhost:10366).
+    // ADJACENT, so no "via". This is the entry topology-d19999.json gets wrong.
+    { "id": 103, "alias": "d103", "reach": "neighbour", "link": 2 }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  // D19999 TALKING TO D102 DIRECTLY, over D102's OWN HDLC listener.
+  //
+  // WHY THIS FILE EXISTS. D102 needs two libraries it does not have -
+  // MON-CALL-1B-A00 and XMP-100-1-B02 - before any chat program can be built
+  // there, and there was no way to deliver them:
+  //
+  //   D100 -> D102 over COSMOS   there is NO XMSG link between them. Measured
+  //                              2026-08-21: D100's link table has ONE entry,
+  //                              us at 19999, and D102 has been calling on LUN
+  //                              1360 with retries and bad frames and nothing
+  //                              answering.
+  //   our runner -> D102         every existing topology has D102 as "via 100",
+  //                              which needs the link above.
+  //
+  // WHAT MAKES IT POSSIBLE. D102's own RetroCore.ini LISTENS for HDLC:
+  //
+  //     F:\RC\RonnyTest\HDLC2\RetroCore.ini
+  //     device add HDLC 1 --listen=10370
+  //
+  // so we can be the one that CONNECTS, exactly as we do to D100 on 10362. That
+  // makes D102 an ordinary neighbour of ours and the file transfer works the
+  // same way it does for D100 - no relay, no route through anything.
+  //
+  // The comment beside that line in the ini says D102 listens so it can be
+  // paired with D103; it is free while that pairing is not in use.
+  "self": 19999,
+
+  "motd": "D19999 seam server - HDLC to D102, file server on",
+
+  "tadUsers": [
+    { "username": "system", "password": "system" },
+    { "username": "ronny",  "password": "" }
+  ],
+
+  "log": {
+    "enabled": true,
+    "level": "info",
+    "file": "xmsg-runner-d102.log",
+    "maxSizeMb": 2,
+    "keep": 3
+  },
+
+  // A DIFFERENT LISTEN PORT FROM THE D100 CONFIG. Both may be wanted at once -
+  // carrying a file from D100 and then on to D102 - and two runners cannot hold
+  // the same port.
+  "listen": { "host": "0.0.0.0", "port": 10404 },
+
+  "fileServer": {
+    "enabled": true,
+    "root": "served-files"
+  },
+
+  "nodes": [
+    { "id": 102, "alias": "d102", "reach": "neighbour", "link": 1, "tcp": { "host": "127.0.0.1", "port": 10370 } },
+    { "id": 19999, "alias": "d19999", "reach": "local" }
+  ]
+}

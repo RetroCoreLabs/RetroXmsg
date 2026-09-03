@@ -1,0 +1,62 @@
+{
+  // Our node on the LIVE Ethernet test network, joining the XMSG hub on 5010 alongside
+  // D100 / D102 / D103 (F:\RC\RonnyTest\HDLC1/2/3).
+  //
+  // WHY 19998 and not 19999: 19999 is the relay node another agent's HDLC work uses. A second
+  // node answering to the same number on the same segment would be the kind of fault that looks
+  // like a protocol bug for a day. Ours is 19998.
+  //
+  // WHY Ethernet and not HDLC: the three machines are already on the hub, and the HDLC ports and
+  // config are reserved. This joins the segment they are on without touching any of that.
+  //
+  // The hub is a BROADCAST hub - every frame reaches every member. Joining is therefore visible
+  // to the machines, and every frame we send is seen by all three.
+
+  "self": 19998,
+
+  // Serve a Windows folder as *FA-SERVER, so a SINTRAN machine can list what we hold.
+  //
+  // THIS BLOCK USED TO CALL A COPY-FILE FROM US "the proven direction". IT IS NOT. Measured
+  // 2026-08-24 on a live D100:
+  //
+  //     @COPY-FILE (PACK-ONE:UTILITY)"XSTART:MODE",D19999(SYSTEM).XSTART:MODE
+  //
+  // Our server logged the connect letter and answered an FA ConnectionConfirm, and then
+  // nothing further ever arrived. D100's open/read was never answered and the terminal sat
+  // there waiting - ESC did not free it. topology-d19999.json had it right all along: this
+  // server answers the opening reserve/release and a directory walk, and refuses open, read,
+  // write, create and delete because those request layouts have never been captured.
+  //
+  // Pushing TO the machine does not work either right now - the connect letters reach D100
+  // and are acked at the link layer, but *FA-SERVER never answers, with 30 free service
+  // points showing in LIST-NAMES. Until one of the two is fixed, a file gets onto a machine
+  // by stopping it and writing the disk image (see boot/install-boot-files.py).
+  "fileServer": { "root": "served" },
+
+
+  "motd": "Windows XMSG node v0.0.1",
+
+  "log": {
+    "enabled": true,
+    "level": "info",
+    "file": "xmsg-runner-eth.log",
+    "maxSizeMb": 2,
+    "keep": 3
+  },
+
+  "nodes": [
+    { "id": 19998, "alias": "windows", "reach": "local" },
+
+    // D102 is the peer we talk to. transport=ethernet with net=tcp dials the hub, exactly as the
+    // RetroCore machines do with  device add ETH 0 --net=tcp:127.0.0.1:5010
+    {
+      "id": 102, "alias": "d102", "reach": "neighbour",
+      "transport": "ethernet",
+      "ethernet": { "net": "tcp", "host": "127.0.0.1", "port": 5010 }
+    },
+
+    // On the same segment, reachable once the machines know about us.
+    { "id": 100, "alias": "d100", "reach": "via", "via": [ 102 ] },
+    { "id": 103, "alias": "d103", "reach": "via", "via": [ 102 ] }
+  ]
+}

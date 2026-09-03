@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RetroXmsg.Hub/RetroXmsg.Hub.csproj" />
+    <Project Path="src/RetroXmsg.Runner/RetroXmsg.Runner.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RetroXmsg.Hub.Tests/RetroXmsg.Hub.Tests.csproj" />
+    <Project Path="tests/RetroXmsg.Runner.Tests/RetroXmsg.Runner.Tests.csproj" />
+  </Folder>
+</Solution>
