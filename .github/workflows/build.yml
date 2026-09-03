@@ -11,6 +11,9 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-      - run: dotnet restore RetroXmsg.sln
-      - run: dotnet build RetroXmsg.sln -c Release --no-restore -warnaserror -nodeReuse:false
-      - run: dotnet test RetroXmsg.sln -c Release --no-build -nodeReuse:false --filter "Category!=Azure&Category!=ExternalTNFSD&Category!=RealNetwork&Category!=Manual&Category!=ProcessSpawn"
+      # No solution filename here on purpose: `dotnet new sln` writes RetroXmsg.slnx on SDK 10
+      # and RetroXmsg.sln on older ones, and a bare `dotnet <verb>` resolves whichever is in the
+      # working directory.
+      - run: dotnet restore
+      - run: dotnet build -c Release --no-restore -warnaserror -nodeReuse:false
+      - run: dotnet test -c Release --no-build -nodeReuse:false --filter "Category!=Azure&Category!=ExternalTNFSD&Category!=RealNetwork&Category!=Manual&Category!=ProcessSpawn"
