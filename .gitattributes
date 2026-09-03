@@ -1,0 +1,8 @@
+* text=auto
+*.img binary
+*.IMG binary
+*.pcapng binary
+*.ndfs binary
+*.gz binary
+*.png binary
+*.ico binary

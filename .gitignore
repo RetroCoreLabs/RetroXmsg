@@ -1,0 +1,18 @@
+## .NET
+[Bb]in/
+[Oo]bj/
+TestResults/
+*.user
+*.suo
+.vs/
+*.nupkg
+*.snupkg
+## Azurite / local state
+__azurite*
+__blobstorage__/
+azurite.log
+pcap-decode-report.txt
+pcap-decode-sample.json
+## test-data junctions (see tools/setup-test-data.ps1)
+/demo/
+/DOC/
