@@ -1,7 +1,7 @@
 {
   // D103 over HDLC - the TRANSPORT A/B TEST against topology-d19999.json.
   //
-  // Run it with:   Xmsg.Live.Runner --config topology-d103-hdlc.json
+  // Run it with:   RetroXmsg.Runner --config topology-d103-hdlc.json
   //
   // WHY THIS FILE EXISTS. File access from D100 reaches our node, D100 acknowledges every frame we
   // send, and then its file-access layer refuses the session with

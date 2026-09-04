@@ -14,7 +14,7 @@
   // ONLY ONE RUNNER MAY HOLD 19999 AT A TIME. The peer keeps a single sequence counter per
   // system number, so two processes sharing the number leave one of them permanently behind -
   // whereupon the machine acknowledges its frames at the link layer and answers nothing above
-  // it, which reads exactly like a dead file server. Check for a running Xmsg.Live.Runner before
+  // it, which reads exactly like a dead file server. Check for a running RetroXmsg.Runner before
   // starting this.
 
   "self": 19999,

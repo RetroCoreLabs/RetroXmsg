@@ -1,6 +1,6 @@
 {
   // D19999 - the C# node, on the COSMOS Ethernet segment with D100 and D102.
-  // Run it with:   Xmsg.Live.Runner --config topology-d19999.json
+  // Run it with:   RetroXmsg.Runner --config topology-d19999.json
   //
   // Why 19999 and not 9999: SINTRAN rejected 9999 with "Virtual system number not allowed" when
   // it was defined with  X-C:DEF-REMOTE,,D9999 9999.  Where the boundary between a "virtual" and
