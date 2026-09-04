@@ -1113,7 +1113,7 @@ internal static class Program
             : "(file logging off)";
         string logFile = fileWriter != null ? fileWriter.FilePath : "(file logging off)";
 
-        Console.WriteLine($"[runner] Xmsg.Live.Runner v{version} built {built}");
+        Console.WriteLine($"[runner] xmsgrunner v{version} built {built}");
         Console.WriteLine($"[runner] config folder: {configFolder}");
         Console.WriteLine($"[runner] config file:   {configPath}");
         Console.WriteLine($"[runner] log folder:    {logFolder}");
