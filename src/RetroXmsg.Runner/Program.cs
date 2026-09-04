@@ -1101,10 +1101,16 @@ internal static class Program
         System.Reflection.Assembly asm = System.Reflection.Assembly.GetExecutingAssembly();
         Version? version = asm.GetName().Version;
 
-        // Build time = the assembly file's last-write time; empty Location (single-file publish) -> unknown.
-        string location = asm.Location;
-        string built = !string.IsNullOrEmpty(location) && System.IO.File.Exists(location)
-            ? System.IO.File.GetLastWriteTime(location).ToString("yyyy-MM-dd HH:mm:ss")
+        // Build time = the executable's last-write time.
+        //
+        // NOT Assembly.Location: it returns an EMPTY string for an assembly embedded in a
+        // single-file app, which is how these are published (build.ps1), so the banner would have
+        // said "unknown" on every shipped build and only shown a real date to developers running
+        // from bin\. The analyzer says so outright - IL3000. Environment.ProcessPath is the path of
+        // the running process itself and is correct in both layouts.
+        string? exePath = Environment.ProcessPath;
+        string built = !string.IsNullOrEmpty(exePath) && System.IO.File.Exists(exePath)
+            ? System.IO.File.GetLastWriteTime(exePath).ToString("yyyy-MM-dd HH:mm:ss")
             : "unknown";
 
         string configFolder = System.IO.Path.GetDirectoryName(configPath) ?? configPath;
@@ -2298,7 +2304,9 @@ internal static class Program
             XmsgFrame f = packet.Frame;
             Console.WriteLine(
                 $"[RX] {f.Header.SourceNode}->{f.Header.DestinationNode} " +
-                $"sub={f.Header.Subtype} proto={f.Header.ProtocolId} f1=0x{f.Header.Flags1:X4} " +
+                // Offsets 12-13 are the header checksum, not a protocol selector - print the whole
+                // word rather than its high byte under a name that invented a field.
+                $"sub={f.Header.Subtype} cksum=0x{f.Header.Checksum:X4} f1=0x{f.Header.Flags1:X4} " +
                 $"info={Convert.ToHexString(packet.RawBytes)}");
             if (f.Header.Subtype == SintranPacketSubtype.Data && f.SubHeader != null)
             {
@@ -2307,7 +2315,7 @@ internal static class Program
                 Console.WriteLine(
                     $"      ports: src {f.SubHeader.SourceSystem}:{sp} (log {sp >> 7}/low {sp & 0x7F})" +
                     $" -> dst {f.SubHeader.DestinationSystem}:{dp} (log {dp >> 7}/low {dp & 0x7F})" +
-                    $"  XMCSM=0x{f.ControlService:X8} role=0x{f.SubHeader.Role:X2}");
+                    $"  XMCSM=0x{f.XmcsmWithBodyWord:X8} role=0x{f.SubHeader.Role:X2}");
                 Console.Write(RetroIO.Protocols.Xmsg.Diagnostics.XmsgDump.ToText(f));
             }
 
