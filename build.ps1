@@ -127,11 +127,15 @@ $publishArgs = @(
     '--self-contained', $selfContained.ToString().ToLowerInvariant()
     '-p:PublishSingleFile=true'
     '-p:IncludeNativeLibrariesForSelfExtract=true'
-    '-p:EnableCompressionInSingleFile=true'
     '-p:SatelliteResourceLanguages=en'
     '-p:DebugType=none'
     '-p:GenerateDocumentationFile=false'
 )
+
+# Compression is REJECTED outright on a framework-dependent publish - NETSDK1176, "compression in a
+# single file bundle is only supported when publishing a self-contained application" - so it is
+# added only for the self-contained case rather than always.
+if ($selfContained) { $publishArgs += '-p:EnableCompressionInSingleFile=true' }
 
 New-Item -ItemType Directory -Force $Output | Out-Null
 
