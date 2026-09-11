@@ -33,7 +33,7 @@ sequence, and why this is a real program rather than a script.
 |---|---|---|---|
 | P1 | .NET SDK as pinned in `global.json` | Everything | `dotnet --info` |
 | P2 | PowerShell 7+ | `build.ps1` | `$PSVersionTable.PSVersion` |
-| P3 | **RetroIO packed to `E:\Dev\RCL\localfeed`** | Restore | `dir E:\Dev\RCL\localfeed` |
+| P3 | **RetroIO packed to the local feed** (`../localfeed`, beside the repositories) | Restore | `dir ..\localfeed` |
 | P4 | A free TCP port for the hub | `xmsghub` | `netstat -ano \| findstr <port>`; `--port 0` picks one |
 | P5 | **A reachable `nd100x --hdlc` bridge** | `xmsgrunner` against a machine | The emulator or the real thing |
 | P6 | A `topology.json` | `xmsgrunner` | Shipped next to the exe, or `--config` |
@@ -41,7 +41,7 @@ sequence, and why this is a real program rather than a script.
 | P8 | A real ND machine or an emulator | An end-to-end run | Record as SKIPPED if unavailable |
 
 ```powershell
-cd E:\Dev\RCL\RetroXmsg
+# from the repository root
 .\build.ps1
 publish\win-x64\xmsghub.exe --port 5010
 publish\win-x64\xmsgrunner.exe --self 103 --for 60
@@ -58,7 +58,7 @@ publish\win-x64\xmsgrunner.exe --self 103 --for 60
 > **2. Only one XMSG runner may hold system number 19999.** Two processes sharing it leave one permanently behind,
 > and the symptom reads exactly like a dead file server. Check before starting.
 
-Both are recorded the same way in `E:\Dev\RCL\Migration\Manual tests - START HERE.md`.
+Both are recorded the same way in the migration notes, in `Manual tests - START HERE.md`.
 
 ---
 
@@ -128,7 +128,7 @@ The protocol is tested in RetroIO — nine `Xmsg.*` test projects, with shared f
 `tests/RetroIO.Protocols.Xmsg.TestSupport`, and codec tests that run against **real captured frames**. That is the
 right place for it: these are applications.
 
-Manual test procedures, including the lab cases, are in `E:\Dev\RCL\Migration\Manual tests - RetroXmsg.md`.
+Manual test procedures, including the lab cases, are in the migration notes, as `Manual tests - RetroXmsg.md`.
 
 To drive a SINTRAN console, use the **retroterm MCP** rather than hand-rolling telnet — open one session and keep
 it, because reconnecting mid-program hangs the line.
@@ -136,7 +136,7 @@ it, because reconnecting mid-program hangs the line.
 ## Conventions
 
 - Names follow the workspace naming standard; diagrams follow the workspace Mermaid palette. Both live one level
-  up, **outside this repository**, so they are paths rather than links: `E:\Dev\RCL\NAMING.md` and
-  `E:\Dev\RCL\MERMAID_COLOR_STANDARDS.md`.
-- `python E:\Dev\RCL\eng\check-docs.py .` checks every link and diagram here.
+  up in the workspace root, **outside this repository**, so they are paths rather than links: `NAMING.md` and
+  `MERMAID_COLOR_STANDARDS.md`.
+- `python ../eng/check-docs.py .` checks every link and diagram here.
 - The org is **RetroCoreLabs**. `HackerCorpLabs` is retired.

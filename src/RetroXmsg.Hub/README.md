@@ -28,7 +28,7 @@ with a hub, that need to reach each other. Chaining hubs joins them without re-p
 | # | Requirement | Why | How to check |
 |---|---|---|---|
 | P1 | .NET SDK as pinned in `global.json`, or the published exe | To build or run | `dotnet --info` |
-| P2 | RetroIO packed to the local feed | Restore | `dir E:\Dev\RCL\localfeed` |
+| P2 | RetroIO packed to the local feed | Restore | `dir ..\localfeed` |
 | P3 | **A free TCP port** | It listens | `netstat -ano \| findstr <port>`; or `--port 0` |
 | P4 | Nodes to connect | Anything useful | `xmsgrunner`, or another hub |
 | P5 | A reachable remote hub | `--uplink` only | Optional |

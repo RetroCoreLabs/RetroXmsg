@@ -37,7 +37,7 @@ It is also where the **real-hardware** problems live, and they are not protocol 
 | # | Requirement | Why | How to check |
 |---|---|---|---|
 | P1 | .NET SDK as pinned in `global.json`, or the published exe | To build or run | `dotnet --info` |
-| P2 | RetroIO packed to the local feed | Restore | `dir E:\Dev\RCL\localfeed` |
+| P2 | RetroIO packed to the local feed | Restore | `dir ..\localfeed` |
 | P3 | **A reachable `nd100x --hdlc` TCP bridge** | Anything live | The emulator, or the real machine |
 | P4 | A `topology.json` | Node identities and aliases | Shipped beside the exe, or `--config` |
 | P5 | **A writable directory for the sequence and seed stores** | Correctness across restarts | One small text file each |
