@@ -71,6 +71,12 @@ import sys
 
 LINK = re.compile(r"(!?)\[([^\]]*)\]\(([^)]+)\)")
 
+# The owner-agnostic GitHub link idiom - see the note in check_links.
+GITHUB_RELATIVE = re.compile(
+    r"^\.\./\.\./"
+    r"(releases|issues|pulls|wiki|discussions|actions|tags|commits|blob|tree|compare|graphs|security)"
+    r"(/|$)")
+
 # Machine-specific absolute paths. %USERPROFILE% and ~ are deliberately not matched - the
 # first version of this pattern wrongly condemned a correct line for using one.
 ABSPATH = re.compile(
@@ -244,6 +250,17 @@ def check_links(root, path, report, config):
             continue
         filepart = target.split("#", 1)[0]
         if not filepart:
+            continue
+
+        # "../../releases" is a deliberate GitHub idiom, not a broken link. A relative link
+        # in a README resolves against https://github.com/<owner>/<repo>/blob/<branch>/, so
+        # climbing two levels lands on https://github.com/<owner>/<repo>/ and the rest names
+        # a GitHub page. It is how you link your own releases without writing the
+        # organisation name, which is exactly what the organisation rename made valuable.
+        #
+        # yt-dlp and nd100x both use it, and so do the skeletons in this repository - the
+        # first version of this check reported our own templates as broken.
+        if GITHUB_RELATIVE.match(filepart):
             continue
         # A Windows absolute path in a link is a path, not a relative link. ABSPATH
         # already has an opinion about it.
