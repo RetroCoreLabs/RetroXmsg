@@ -4,6 +4,16 @@
 the C# XMSG stack against a real SINTRAN III machine — file transfer, folder synchronisation, chat and terminal
 sessions.
 
+[![build](https://github.com/RetroCoreLabs/RetroXmsg/actions/workflows/build.yml/badge.svg)](https://github.com/RetroCoreLabs/RetroXmsg/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/RetroCoreLabs/RetroXmsg)](https://github.com/RetroCoreLabs/RetroXmsg/releases)
+[![licence](https://img.shields.io/github/license/RetroCoreLabs/RetroXmsg)](LICENSE)
+[![downloads](https://img.shields.io/github/downloads/RetroCoreLabs/RetroXmsg/total)](https://github.com/RetroCoreLabs/RetroXmsg/releases)
+[Applications](#the-two-applications) Â· [Prerequisites](#prerequisites) Â· [Two traps first](#two-traps-before-you-start) Â· [About XMSG](#about-xmsg)
+
+<!-- A 5-15 second recording: xmsgrunner connecting to a SINTRAN machine and pulling a file.
+     Under 10 MB. Uncomment when the capture exists.
+![xmsgrunner connecting to a SINTRAN III machine and pulling a file across with XMSG.](docs/images/readme/demo.gif)
+-->
 ## Why this repo exists
 
 XMSG is the messaging system SINTRAN III and COSMOS are built on. File transfer, terminal access, the name service,
@@ -27,6 +37,20 @@ sequence, and why this is a real program rather than a script.
 
 ---
 
+## Status
+
+No tagged release yet, so the release and download badges above are empty until the first
+`v*` tag is pushed. Both applications build and run.
+
+- **The solution builds in Release with no errors**, and two test projects cover it.
+- **The outgoing datagram sequence persists across a restart**, which is the thing that makes
+  this a real program rather than a script - see the next section but one for why.
+- **The codec is tested in RetroIO, not here.** This repository is the two programs that use
+  it.
+- **Not verified in this session:** that the runner still reaches a real ND machine. That
+  needs the machine, and is a bench check rather than a test.
+
+---
 ## Prerequisites
 
 | # | Requirement | Needed for | How to check |
@@ -133,6 +157,25 @@ Manual test procedures, including the lab cases, are in the migration notes, as 
 To drive a SINTRAN console, use the **retroterm MCP** rather than hand-rolling telnet — open one session and keep
 it, because reconnecting mid-program hangs the line.
 
+## About XMSG
+
+XMSG is the messaging system that Norsk Data's SINTRAN III operating system and its COSMOS
+networking are built on. Almost everything one ND machine does with another goes through it:
+file transfer, terminal access, the XROUT name service, remote procedure calls. They are all
+XMSG messages that differ only in a service number. So reaching an ND machine for practically
+any purpose means speaking XMSG.
+
+Norsk Data was Norway's computer manufacturer, and its ND-100 and ND-500 minicomputers ran
+universities, hospitals, banks, shipping and defence across Scandinavia from the 1970s into
+the 1990s. A fair number of those machines survive in working order, and XMSG is how you talk
+to one.
+
+The message format is the easy half. The hard half is **continuity**: SINTRAN keeps a
+persistent outgoing datagram sequence per remote node, and expects ours to carry on across our
+process restarts. Get it wrong and the machine discards our frames as duplicates, which looks
+exactly like a dead link and is the single most confusing failure in this protocol.
+
+---
 ## Conventions
 
 - Names follow the workspace naming standard; diagrams follow the workspace Mermaid palette. Both live one level
@@ -140,3 +183,13 @@ it, because reconnecting mid-program hangs the line.
   `MERMAID_COLOR_STANDARDS.md`.
 - `python eng/check-docs.py` checks every link and diagram here.
 - The org is **RetroCoreLabs**. `HackerCorpLabs` is retired.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get a build running, what the code is
+expected to look like, and what will get a change sent back. A security problem goes through
+[SECURITY.md](SECURITY.md) and never a public issue.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).

@@ -1,5 +1,10 @@
 # xmsgrunner — the live XMSG node
 
+<!-- A still screenshot of RetroXmsg.Runner doing its job. PNG, under 10 MB. Uncomment when
+     the capture exists; keep the alt text, it is all a screen reader gets.
+![RetroXmsg.Runner in use.](../../docs/images/readme/RetroXmsg.Runner.png)
+-->
+
 ## What it is
 
 The program that talks to a real Norsk Data machine. It connects the C# XMSG stack to an `nd100x --hdlc` TCP bridge,

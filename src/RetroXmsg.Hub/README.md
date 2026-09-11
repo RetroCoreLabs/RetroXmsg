@@ -1,5 +1,10 @@
 # xmsghub — the XMSG hub
 
+<!-- A still screenshot of RetroXmsg.Hub doing its job. PNG, under 10 MB. Uncomment when
+     the capture exists; keep the alt text, it is all a screen reader gets.
+![RetroXmsg.Hub in use.](../../docs/images/readme/RetroXmsg.Hub.png)
+-->
+
 ## What it is
 
 A hub that links XMSG nodes over TCP. Nodes connect to it; it carries their traffic to each other. Hubs can also
