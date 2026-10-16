@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\RetroXmsg.Hub\RetroXmsg.Hub.csproj" />
+    <ProjectReference Include="..\..\RetroXmsg.Hub\RetroXmsg.Hub.csproj" />
   </ItemGroup>
 
 </Project>

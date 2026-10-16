@@ -1,7 +1,12 @@
 name: release
+# Push a tag like v1.2.3 and this builds, tests and publishes both applications as single
+# self-contained executables, writes 1.2.3 into every one of them, and attaches the zip to a
+# GitHub release. A tag with a hyphen (v1.2.3-rc.1) makes a pre-release.
 on:
   push:
     tags: [ 'v*' ]
+permissions:
+  contents: write
 jobs:
   release:
     runs-on: windows-latest
@@ -9,8 +14,58 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          global-json-file: global.json
-      - run: dotnet publish -c Release -nodeReuse:false -o publish
+          global-json-file: src/global.json
+
+      # RetroXmsg references the RetroIO packages as 0.1.0-local.*, which exist only in a local
+      # folder feed. Build them here, into the folder src/nuget.config points at (the parent of
+      # the workspace, beside it). RetroIO is private, so the checkout needs RETROIO_TOKEN: a
+      # fine-grained personal access token with read access to the RetroIO repository's contents.
+      - name: Check out RetroIO
+        uses: actions/checkout@v4
+        with:
+          repository: RetroCoreLabs/RetroIO
+          token: ${{ secrets.RETROIO_TOKEN }}
+          path: RetroIO
+
+      - name: Pack RetroIO into the local feed
+        shell: pwsh
+        run: ./RetroIO/src/eng/publish-local.ps1 -Feed "$env:GITHUB_WORKSPACE/../localfeed"
+
+      - name: Version from the tag
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          if ($tag -notmatch '^v(\d+\.\d+\.\d+([-+][0-9A-Za-z.-]+)?)$') {
+            throw "tag '$tag' is not vMAJOR.MINOR.PATCH, for example v1.2.3 or v1.2.3-rc.1"
+          }
+          "VERSION=$($Matches[1])" >> $env:GITHUB_ENV
+
+      # build.ps1 builds, runs the tests with the CI category filter, then publishes every
+      # executable as one self-contained file. -Version is what puts the number in the binary.
+      - name: Build, test and publish
+        shell: pwsh
+        working-directory: src
+        run: ./build.ps1 -Version $env:VERSION
+
+      # Read the version back out of the files that will be released. A release whose binaries
+      # say 0.1.0 is wrong in a way nobody notices until someone asks which build they are running.
+      - name: Check the version is in the binaries
+        shell: pwsh
+        run: |
+          $exes = Get-ChildItem src/publish/win-x64 -Filter *.exe
+          if (-not $exes) { throw 'no executables were published' }
+          foreach ($e in $exes) {
+            $pv = $e.VersionInfo.ProductVersion
+            "{0}: product version {1}, file version {2}" -f $e.Name, $pv, $e.VersionInfo.FileVersion
+            if (-not $pv.StartsWith($env:VERSION)) { throw "$($e.Name) reports '$pv', expected $env:VERSION" }
+          }
+
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path src/publish/win-x64/* -DestinationPath "RetroXmsg-$env:VERSION-win-x64.zip"
+
       - uses: softprops/action-gh-release@v2
         with:
-          files: publish/**
+          files: RetroXmsg-${{ env.VERSION }}-win-x64.zip
+          generate_release_notes: true
+          prerelease: ${{ contains(env.VERSION, '-') }}

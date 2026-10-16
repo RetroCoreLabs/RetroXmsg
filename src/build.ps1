@@ -28,10 +28,16 @@
   RID to publish for. Default win-x64. linux-x64 and osx-arm64 also work for the console apps.
 
 .PARAMETER Output
-  Where the exes go. Default: publish\<Runtime> in the repo root.
+  Where the exes go. Default: publish\<Runtime> next to this script (src\publish).
 
 .PARAMETER FrameworkDependent
   Publish small exes that need a matching .NET runtime installed, instead of self-contained ones.
+
+.PARAMETER Version
+  The version to write into the published executables, for example 1.2.3 or 1.2.3-rc.1. It
+  becomes the assembly version, the file version and the product version shown in the file
+  properties. The release workflow passes the tag without its leading v. Default: the
+  VersionPrefix in Directory.Build.props, so a local build is labelled as a development build.
 
 .PARAMETER SkipTests
   Do not run the test suites first. The default is to run them and stop on failure - publishing
@@ -43,6 +49,7 @@
 .EXAMPLE
   .\build.ps1
   .\build.ps1 -Configuration Debug -SkipTests
+  .\build.ps1 -Version 1.2.3
   .\build.ps1 -Runtime linux-x64 -Output E:\drop
 #>
 param(
@@ -50,6 +57,7 @@ param(
     [string]$Configuration = 'Release',
     [string]$Runtime = 'win-x64',
     [string]$Output = '',
+    [string]$Version = '',
     [switch]$FrameworkDependent,
     [switch]$SkipTests,
     [switch]$Clean
@@ -57,12 +65,21 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
+
+# A version that MSBuild cannot parse fails late, in the middle of a publish. Say so now.
+if ($Version -and $Version -notmatch '^\d+\.\d+\.\d+([-+][0-9A-Za-z.-]+)?$') {
+    throw "-Version '$Version' is not a version like 1.2.3 or 1.2.3-rc.1"
+}
 if (-not $Output) { $Output = Join-Path $root (Join-Path 'publish' $Runtime) }
 
 # nodeReuse:false on every call. Node reuse is ON by default and leaves MSBuild worker processes
 # behind; each one holds a DLL open, so the NEXT build silently keeps the old binary and the tests
 # then pass against stale code.
 $common = @('-nodeReuse:false')
+# Version is the one switch that sets AssemblyVersion, FileVersion and InformationalVersion
+# together. It is given to the build as well as the publish so the tests run against the same
+# binaries that ship.
+if ($Version) { $common += "-p:Version=$Version" }
 
 function Write-Head($text) {
     Write-Host ''
@@ -94,7 +111,7 @@ function Get-ExecutableProjects {
 $projects = Get-ExecutableProjects
 if (-not $projects) { throw "no executable projects found under $root" }
 
-Write-Head "$(Split-Path -Leaf $root) - $($projects.Count) executable(s), $Configuration, $Runtime"
+Write-Head "$(Split-Path -Leaf (Split-Path -Parent $root)) - $($projects.Count) executable(s), $Configuration, $Runtime"
 $projects | ForEach-Object { Write-Host ("  {0,-18} {1}" -f $_.Name, $_.Path.Substring($root.Length + 1)) }
 
 if ($Clean -and (Test-Path $Output)) {
@@ -153,7 +170,8 @@ $exes = Get-ChildItem $Output -Filter *.exe -File | Sort-Object Name
 if (-not $exes) { $exes = Get-ChildItem $Output -File | Where-Object { -not $_.Extension } | Sort-Object Name }
 
 $exes | ForEach-Object {
-    Write-Host ("  {0,-22} {1,8:N1} MB" -f $_.Name, ($_.Length / 1MB))
+    $v = if ($_.Extension -eq '.exe') { $_.VersionInfo.ProductVersion } else { '' }
+    Write-Host ("  {0,-22} {1,8:N1} MB  {2}" -f $_.Name, ($_.Length / 1MB), $v)
 }
 
 # Loose DLLs beside the exes mean the single-file switches did not do their job. Say so loudly

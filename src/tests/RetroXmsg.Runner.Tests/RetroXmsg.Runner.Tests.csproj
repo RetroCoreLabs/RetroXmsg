@@ -23,7 +23,7 @@
       link a datagram leaves by, and untested routing in the one program that talks to real
       hardware is not something this project accepts.
     -->
-    <ProjectReference Include="..\..\src\RetroXmsg.Runner\RetroXmsg.Runner.csproj" />
+    <ProjectReference Include="..\..\RetroXmsg.Runner\RetroXmsg.Runner.csproj" />
   </ItemGroup>
 
 </Project>

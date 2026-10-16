@@ -10,10 +10,28 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          global-json-file: global.json
+          global-json-file: src/global.json
+      # RetroXmsg references the RetroIO packages as 0.1.0-local.*, which exist only in a local
+      # folder feed. Build them here, into the folder src/nuget.config points at (the parent of
+      # the workspace, beside it). RetroIO is private, so the checkout needs RETROIO_TOKEN: a
+      # fine-grained personal access token with read access to the RetroIO repository's contents.
+      - name: Check out RetroIO
+        uses: actions/checkout@v4
+        with:
+          repository: RetroCoreLabs/RetroIO
+          token: ${{ secrets.RETROIO_TOKEN }}
+          path: RetroIO
+
+      - name: Pack RetroIO into the local feed
+        shell: pwsh
+        run: ./RetroIO/src/eng/publish-local.ps1 -Feed "$env:GITHUB_WORKSPACE/../localfeed"
+
       # No solution filename here on purpose: `dotnet new sln` writes RetroXmsg.slnx on SDK 10
       # and RetroXmsg.sln on older ones, and a bare `dotnet <verb>` resolves whichever is in the
       # working directory.
       - run: dotnet restore
+        working-directory: src
       - run: dotnet build -c Release --no-restore -warnaserror -nodeReuse:false
+        working-directory: src
       - run: dotnet test -c Release --no-build -nodeReuse:false --filter "Category!=Azure&Category!=ExternalTNFSD&Category!=RealNetwork&Category!=Manual&Category!=ProcessSpawn"
+        working-directory: src

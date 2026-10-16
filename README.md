@@ -14,6 +14,12 @@ sessions.
      Under 10 MB. Uncomment when the capture exists.
 ![xmsgrunner connecting to a SINTRAN III machine and pulling a file across with XMSG.](docs/images/readme/demo.gif)
 -->
+## How this code was written
+
+Some of the code in this repository was written with the help of AI, mostly Claude (Anthropic).
+Ronny Hansen directs the work, tests it against real hardware and emulators, and is responsible for
+what is in the repository. We say so plainly so you know what you are using.
+
 ## Why this repo exists
 
 XMSG is the messaging system SINTRAN III and COSMOS are built on. File transfer, terminal access, the name service,
@@ -55,7 +61,7 @@ No tagged release yet, so the release and download badges above are empty until 
 
 | # | Requirement | Needed for | How to check |
 |---|---|---|---|
-| P1 | .NET SDK as pinned in `global.json` | Everything | `dotnet --info` |
+| P1 | .NET SDK as pinned in `src/global.json` | Everything | `dotnet --info` |
 | P2 | PowerShell 7+ | `build.ps1` | `$PSVersionTable.PSVersion` |
 | P3 | **RetroIO packed to the local feed** (`../localfeed`, beside the repositories) | Restore | `dir ..\localfeed` |
 | P4 | A free TCP port for the hub | `xmsghub` | `netstat -ano \| findstr <port>`; `--port 0` picks one |
@@ -66,9 +72,9 @@ No tagged release yet, so the release and download badges above are empty until 
 
 ```powershell
 # from the repository root
-.\build.ps1
-publish\win-x64\xmsghub.exe --port 5010
-publish\win-x64\xmsgrunner.exe --self 103 --for 60
+.\src\build.ps1
+src\publish\win-x64\xmsghub.exe --port 5010
+src\publish\win-x64\xmsgrunner.exe --self 103 --for 60
 ```
 
 ---
@@ -149,7 +155,7 @@ This is the single most useful thing to know about running against real hardware
 ## Tests
 
 The protocol is tested in RetroIO — nine `Xmsg.*` test projects, with shared fixtures in
-`tests/RetroIO.Protocols.Xmsg.TestSupport`, and codec tests that run against **real captured frames**. That is the
+`src/tests/RetroIO.Protocols.Xmsg.TestSupport` in RetroIO, and codec tests that run against **real captured frames**. That is the
 right place for it: these are applications.
 
 Manual test procedures, including the lab cases, are in the migration notes, as `Manual tests - RetroXmsg.md`.
@@ -181,14 +187,14 @@ exactly like a dead link and is the single most confusing failure in this protoc
 - Names follow the workspace naming standard; diagrams follow the workspace Mermaid palette. Both live one level
   up in the workspace root, **outside this repository**, so they are paths rather than links: `NAMING.md` and
   `MERMAID_COLOR_STANDARDS.md`.
-- `python eng/check-docs.py` checks every link and diagram here.
+- `python src/eng/check-docs.py` checks every link and diagram here.
 - The org is **RetroCoreLabs**. `HackerCorpLabs` is retired.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get a build running, what the code is
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for how to get a build running, what the code is
 expected to look like, and what will get a change sent back. A security problem goes through
-[SECURITY.md](SECURITY.md) and never a public issue.
+[SECURITY.md](.github/SECURITY.md) and never a public issue.
 
 ## Licence
 

@@ -9,13 +9,13 @@ like, and what will get a change sent back.
 
 | # | Requirement | How to check |
 |---|---|---|
-| 1 | The .NET SDK version pinned in `global.json` | `dotnet --info` |
+| 1 | The .NET SDK version pinned in `src/global.json` | `dotnet --info` |
 | 2 | PowerShell 7 or newer | `$PSVersionTable.PSVersion` |
 | 3 | **RetroIO, cloned beside this repository and packed** | see the next section - this one is not optional |
 
 ```powershell
 # from the repository root
-.\build.ps1
+.\src\build.ps1
 ```
 
 `build.ps1` builds, runs the tests, and publishes each application as a single self-contained
@@ -40,7 +40,7 @@ What you need:
 
 ```powershell
 # in the RetroIO clone
-powershell -File eng\publish-local.ps1
+powershell -File src\eng\publish-local.ps1
 ```
 
 That packs every RetroIO package into `../localfeed` with a fresh timestamp. `nuget.config` in
@@ -84,7 +84,7 @@ must not appear in anything new.
 ## Documentation changes
 
 ```powershell
-python eng\check-docs.py
+python src\eng\check-docs.py
 ```
 
 It must exit 0. It fails on a relative link that does not resolve, a relative link that escapes
@@ -110,7 +110,7 @@ build-from-source, every application in a table linking its own README, licence 
  2. One logical change per commit. A commit message says **what changed and why**, in plain
     words - the subject line in the imperative, then a blank line, then the reasoning. If you
     measured something, put the number in the message.
- 3. `.\build.ps1` passes, including the tests, before you open the pull request.
+ 3. `.\src\build.ps1` passes, including the tests, before you open the pull request.
  4. Say in the pull request what you verified and how. "Tests pass" on its own is not useful;
     "the three LAPB timer tests now cover the T2 case, 42 tests, all green" is.
  5. If something is still broken or unfinished, say so plainly. A known gap that is written down
@@ -120,4 +120,4 @@ build-from-source, every application in a table linking its own README, licence 
 
 ## Licence
 
-By contributing you agree your work is licensed under the MIT licence in [LICENSE](LICENSE).
+By contributing you agree your work is licensed under the MIT licence in [LICENSE](../LICENSE).
