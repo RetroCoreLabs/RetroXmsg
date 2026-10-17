@@ -61,7 +61,9 @@ namespace RetroXmsg.Runner
         private readonly List<ushort> _ports = new List<ushort>();
         private readonly Dictionary<ushort, int> _portToUser = new Dictionary<ushort, int>();
 
-        /// <summary>The server port each user learned from its welcome, or 0.</summary>
+        /// <summary>
+        /// The server port each user learned from its welcome, or 0.
+        /// </summary>
         private readonly Dictionary<int, ushort> _serverPortFor = new Dictionary<int, ushort>();
 
         private int _welcomed;
@@ -82,10 +84,14 @@ namespace RetroXmsg.Runner
         /// </remarks>
         private const int SettlePumps = 20;
 
-        /// <summary>The serial we stamp on every letter, echoed back unchanged by XROUT.</summary>
+        /// <summary>
+        /// The serial we stamp on every letter, echoed back unchanged by XROUT.
+        /// </summary>
         private const byte LetterSerial = 0x7B;
 
-        /// <summary>The XSLET service number, replaced by a status on a reply.</summary>
+        /// <summary>
+        /// The XSLET service number, replaced by a status on a reply.
+        /// </summary>
         private const byte XsletService = 65;
 
         private Phase _phase = Phase.Idle;
@@ -96,25 +102,39 @@ namespace RetroXmsg.Runner
         /// </summary>
         private enum Phase
         {
-            /// <summary>Nothing sent yet.</summary>
+            /// <summary>
+            /// Nothing sent yet.
+            /// </summary>
             Idle,
 
-            /// <summary>Join letters are out; waiting for welcomes.</summary>
+            /// <summary>
+            /// Join letters are out; waiting for welcomes.
+            /// </summary>
             Joining,
 
-            /// <summary>Members are talking.</summary>
+            /// <summary>
+            /// Members are talking.
+            /// </summary>
             Talking,
 
-            /// <summary>Talking is done; waiting for the room to broadcast it back.</summary>
+            /// <summary>
+            /// Talking is done; waiting for the room to broadcast it back.
+            /// </summary>
             Settling,
 
-            /// <summary>Members are leaving.</summary>
+            /// <summary>
+            /// Members are leaving.
+            /// </summary>
             Leaving,
 
-            /// <summary>Everyone has left; waiting before the summary is printed.</summary>
+            /// <summary>
+            /// Everyone has left; waiting before the summary is printed.
+            /// </summary>
             Finishing,
 
-            /// <summary>Everything is done and the summary is printed.</summary>
+            /// <summary>
+            /// Everything is done and the summary is printed.
+            /// </summary>
             Done,
         }
 

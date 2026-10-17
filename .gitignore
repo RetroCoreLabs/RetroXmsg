@@ -13,9 +13,6 @@ __blobstorage__/
 azurite.log
 pcap-decode-report.txt
 pcap-decode-sample.json
-## test-data junctions (see tools/setup-test-data.ps1)
-/demo/
-/DOC/
 ## build.ps1 output - single-file executables, rebuildable
 publish/
 

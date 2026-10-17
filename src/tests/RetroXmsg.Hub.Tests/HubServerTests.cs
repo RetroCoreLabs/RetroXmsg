@@ -200,6 +200,10 @@ namespace RetroXmsg.Hub.Tests
             return frame;
         }
 
+        /// <summary>
+        /// A frame from one member is delivered to every other member and is not echoed back to
+        /// the member that sent it.
+        /// </summary>
         [Fact]
         public void FrameReachesEveryOtherMember_ButNotTheSender()
         {

@@ -921,18 +921,6 @@ internal static class Program
     }
 
     /// <summary>
-    /// Removes a named <c>--option value</c> pair from the argument list and returns its value.
-    /// </summary>
-    /// <param name="args">
-    /// The mutable argument list; the option name and its value are removed in place when found.
-    /// </param>
-    /// <param name="name">
-    /// The option name to look for (for example <c>--config</c>), matched case-insensitively.
-    /// </param>
-    /// <returns>
-    /// The value following the option, or <c>null</c> when the option is absent.
-    /// </returns>
-    /// <summary>
     /// Takes a valueless flag out of the argument vector.
     /// </summary>
     /// <param name="args">
@@ -958,6 +946,18 @@ internal static class Program
         return false;
     }
 
+    /// <summary>
+    /// Removes a named <c>--option value</c> pair from the argument list and returns its value.
+    /// </summary>
+    /// <param name="args">
+    /// The mutable argument list; the option name and its value are removed in place when found.
+    /// </param>
+    /// <param name="name">
+    /// The option name to look for (for example <c>--config</c>), matched case-insensitively.
+    /// </param>
+    /// <returns>
+    /// The value following the option, or <c>null</c> when the option is absent.
+    /// </returns>
     private static string? TakeOption(List<string> args, string name)
     {
         for (int i = 0; i < args.Count; i++)
@@ -978,16 +978,6 @@ internal static class Program
         return null;
     }
 
-    /// <summary>
-    /// Prints the startup banner: the runner version and build time, plus the full folders (and paths)
-    /// of the config file and the log file.
-    /// </summary>
-    /// <param name="configPath">
-    /// The resolved topology config file path (its folder is reported).
-    /// </param>
-    /// <param name="fileWriter">
-    /// The active log writer, or <c>null</c> when file logging is off (then the log folder is reported as off).
-    /// </param>
     /// <summary>
     /// How many FA connection numbers each run reserves up front.
     /// </summary>
@@ -1096,6 +1086,16 @@ internal static class Program
         return start;
     }
 
+    /// <summary>
+    /// Prints the startup banner: the runner version and build time, plus the full folders (and paths)
+    /// of the config file and the log file.
+    /// </summary>
+    /// <param name="configPath">
+    /// The resolved topology config file path (its folder is reported).
+    /// </param>
+    /// <param name="fileWriter">
+    /// The active log writer, or <c>null</c> when file logging is off (then the log folder is reported as off).
+    /// </param>
     private static void PrintStartupBanner(string configPath, RotatingFileWriter? fileWriter)
     {
         System.Reflection.Assembly asm = System.Reflection.Assembly.GetExecutingAssembly();
@@ -1527,6 +1527,10 @@ internal static class Program
     /// <param name="targetName">
     /// The remote name carried in the connect letter.
     /// </param>
+    /// <param name="seed">
+    /// The link seed shared by the two nodes, from the command line or the default for the
+    /// observed node pair (100-102 is <c>0x14</c>, 100-103 is <c>0x13</c>).
+    /// </param>
     /// <param name="token">
     /// A token that stops the session.
     /// </param>
@@ -1610,66 +1614,6 @@ internal static class Program
     }
 
     /// <summary>
-    /// The restructured seam composition: TcpBridgeTransport -> LapbLayerAdapter(ILink) ->
-    /// BoundProtocolDetector -> XmsgCodec -> XmsgLayer. Routing/TAD services are configured on the
-    /// layer; the link is bound to XMSG, and the detector (a per-link-binding stub) confirms it.
-    /// </summary>
-    /// <summary>
-    /// Runs this node as a RELAY between two HDLC links: one the peer dials into, one we dial out.
-    /// </summary>
-    /// <param name="topology">
-    /// The loaded topology, for the route table.
-    /// </param>
-    /// <param name="listenPort">
-    /// The TCP port the inbound peer's bridge connects to.
-    /// </param>
-    /// <param name="dialHost">
-    /// The host of the outbound bridge.
-    /// </param>
-    /// <param name="dialPort">
-    /// The port of the outbound bridge.
-    /// </param>
-    /// <param name="node">
-    /// The system number this runner presents on both links.
-    /// </param>
-    /// <param name="routingEntries">
-    /// The routes this node advertises.
-    /// </param>
-    /// <param name="motdLine">
-    /// The TAD banner middle line, or null for the built-in one.
-    /// </param>
-    /// <param name="users">
-    /// The TAD login accounts.
-    /// </param>
-    /// <param name="fileServer">
-    /// The COSMOS file server, or null when no folder is configured.
-    /// </param>
-    /// <param name="token">
-    /// Stops the pump.
-    /// </param>
-    /// <returns>
-    /// A task that completes when the pump stops.
-    /// </returns>
-    /// <remarks>
-    /// <para><b>Why a node must LISTEN to be a relay</b></para>
-    /// Every other path here dials out, which makes this node a leaf - an endpoint of somebody
-    /// else's link. Traffic only crosses a relay when something is reachable ONLY through it, so at
-    /// least one link has to be one the peer dials INTO.
-    /// <para>
-    /// Live shape: D103's <c>RetroCore.ini</c> points its HDLC at <paramref name="listenPort"/>
-    /// instead of at D100, and we dial D100 ourselves. D103 traffic for D100 then has to cross this
-    /// node, which is the only arrangement in which the relay carries anything.
-    /// </para>
-    /// <para><b>One host per link, deliberately</b></para>
-    /// <see cref="XmsgNodeHost"/> is the whole per-link stack - codec, layer, responder sequence and
-    /// learned link id all belong to ONE peer - so two links means two hosts, composed by
-    /// <see cref="XmsgRelayNode"/>. That also sets each host's transit filter, which is what stops
-    /// both a host and the relay acting on the same datagram.
-    /// <para><b>Ordering matters</b></para>
-    /// The listener comes up FIRST, so a peer already retrying its connect is accepted immediately.
-    /// The outbound dial follows.
-    /// </remarks>
-    /// <summary>
     /// Reports whether an arriving subtype is a REQUEST that ought to be answered.
     /// </summary>
     /// <param name="subtype">
@@ -1713,6 +1657,10 @@ internal static class Program
     /// <param name="peer">
     /// The node a transfer will address.
     /// </param>
+    /// <param name="originateFromSeed">
+    /// <see langword="true"/> to allow originating to a peer we have met before using its remembered
+    /// envelope seed, instead of waiting for it to address us again. Opt-in; see the remarks.
+    /// </param>
     /// <returns>
     /// A test that is true only once <paramref name="peer"/> has addressed us.
     /// </returns>
@@ -1731,12 +1679,6 @@ internal static class Program
     /// all. Naming it here means the rule is testable and has one definition rather than one per
     /// call site.
     /// </para>
-    /// </remarks>
-    /// <param name="originateFromSeed">
-    /// <see langword="true"/> to allow originating to a peer we have met before using its remembered
-    /// envelope seed, instead of waiting for it to address us again. Opt-in; see the remarks.
-    /// </param>
-    /// <remarks>
     /// <para><b>The seed gate is an EXPERIMENT and is off by default</b></para>
     /// <para>
     /// With <paramref name="originateFromSeed"/> set, the gate becomes
@@ -1766,6 +1708,67 @@ internal static class Program
         return () => host.ServerHost.CanReach(peer);
     }
 
+    /// <summary>
+    /// Runs this node as a RELAY between two HDLC links: one the peer dials into, one we dial out.
+    /// </summary>
+    /// <param name="topology">
+    /// The loaded topology, for the route table.
+    /// </param>
+    /// <param name="listenPort">
+    /// The TCP port the inbound peer's bridge connects to.
+    /// </param>
+    /// <param name="dialHost">
+    /// The host of the outbound bridge.
+    /// </param>
+    /// <param name="dialPort">
+    /// The port of the outbound bridge.
+    /// </param>
+    /// <param name="node">
+    /// The system number this runner presents on both links.
+    /// </param>
+    /// <param name="inboundPeer">
+    /// The node on the link that dials into <paramref name="listenPort"/>.
+    /// </param>
+    /// <param name="outboundPeer">
+    /// The node on the link we dial at <paramref name="dialHost"/> and <paramref name="dialPort"/>.
+    /// </param>
+    /// <param name="routingEntries">
+    /// The routes this node advertises.
+    /// </param>
+    /// <param name="motdLine">
+    /// The TAD banner middle line, or null for the built-in one.
+    /// </param>
+    /// <param name="users">
+    /// The TAD login accounts.
+    /// </param>
+    /// <param name="fileServer">
+    /// The COSMOS file server, or null when no folder is configured.
+    /// </param>
+    /// <param name="token">
+    /// Stops the pump.
+    /// </param>
+    /// <returns>
+    /// A task that completes when the pump stops.
+    /// </returns>
+    /// <remarks>
+    /// <para><b>Why a node must LISTEN to be a relay</b></para>
+    /// Every other path here dials out, which makes this node a leaf - an endpoint of somebody
+    /// else's link. Traffic only crosses a relay when something is reachable ONLY through it, so at
+    /// least one link has to be one the peer dials INTO.
+    /// <para>
+    /// Live shape: D103's <c>RetroCore.ini</c> points its HDLC at <paramref name="listenPort"/>
+    /// instead of at D100, and we dial D100 ourselves. D103 traffic for D100 then has to cross this
+    /// node, which is the only arrangement in which the relay carries anything.
+    /// </para>
+    /// <para><b>One host per link, deliberately</b></para>
+    /// <see cref="XmsgNodeHost"/> is the whole per-link stack - codec, layer, responder sequence and
+    /// learned link id all belong to ONE peer - so two links means two hosts, composed by
+    /// <see cref="XmsgRelayNode"/>. That also sets each host's transit filter, which is what stops
+    /// both a host and the relay acting on the same datagram.
+    /// <para><b>Ordering matters</b></para>
+    /// The listener comes up FIRST, so a peer already retrying its connect is accepted immediately.
+    /// The outbound dial follows.
+    /// </remarks>
     private static async Task RunRelayAsync(
         TopologyConfig? topology, int listenPort, string dialHost, int dialPort, ushort node,
         ushort inboundPeer, ushort outboundPeer,
@@ -2107,6 +2110,11 @@ internal static class Program
         return rooms.ToArray();
     }
 
+    /// <summary>
+    /// The restructured seam composition: TcpBridgeTransport -> LapbLayerAdapter(ILink) ->
+    /// BoundProtocolDetector -> XmsgCodec -> XmsgLayer. Routing/TAD services are configured on the
+    /// layer; the link is bound to XMSG, and the detector (a per-link-binding stub) confirms it.
+    /// </summary>
     private static async Task RunSeamAsync(
         TcpBridgeTransport transport, string host, int port, ushort node,
         IReadOnlyList<RoutingTableEntry> routingEntries, string? motdLine, TadUserDirectory users,
@@ -2708,27 +2716,6 @@ internal static class Program
     }
 
     /// <summary>
-    /// Builds this runner's XSGSY routing table relative to the node number we are impersonating.
-    /// </summary>
-    /// <param name="node">
-    /// The system number this runner presents on the wire (the runner's <c>ownNode</c> argument).
-    /// </param>
-    /// <returns>
-    /// The routing-table entries, self-consistent for whichever node we run as.
-    /// </returns>
-    /// <remarks>
-    /// The table MUST be built relative to <paramref name="node"/>, otherwise the XSGSY server hands
-    /// node 100 a route that loops back through itself. Concretely, the old fixed table always carried
-    /// a "102 reachable Via 100" entry. When the runner is started AS node 102 that entry shadows the
-    /// correct "102 is Local (this is me)" self-entry - <see cref="InMemoryRoutingTable.TryLookup"/>
-    /// returns the first <c>System >= query</c>, which is the Via-100 entry - so 100's <c>li-rout</c>
-    /// reports <c>*->102->100->102...  *Loop suspected*</c> and connect-to routing breaks.
-    /// Rules:
-    ///  - Our own <paramref name="node"/> is ALWAYS Local (0 hops); never advertise a route to ourselves via anyone.
-    ///  - 100 is the direct HDLC link peer (Neighbour), unless we ourselves are 100.
-    ///  - 102 is the TAD responder reached through 100 (Via, 2 hops), unless we ourselves are 102.
-    /// </remarks>
-    /// <summary>
     /// Runs the node over a COSMOS Ethernet segment instead of an HDLC bridge:
     /// EthernetBackend -> EthernetLink(ILink) -> XmsgNodeHost.
     /// </summary>
@@ -2750,9 +2737,47 @@ internal static class Program
     /// <param name="users">
     /// The TAD login accounts.
     /// </param>
+    /// <param name="fileServer">
+    /// The COSMOS file server, or null when no folder is configured.
+    /// </param>
     /// <param name="pushRun">
     /// The file push, or null when none was asked for. It sends nothing until the peer has
     /// addressed us, because the peer's link id is learned and cannot be derived.
+    /// </param>
+    /// <param name="pullRun">
+    /// The file fetch, or null when none was asked for. Held back the same way as
+    /// <paramref name="pushRun"/>.
+    /// </param>
+    /// <param name="traceFrames">
+    /// <see langword="true"/> for <c>--trace-frames</c>: log every frame with hex dumps. Off by
+    /// default because the logging slows the acknowledgements enough to drop the link.
+    /// </param>
+    /// <param name="announceRestart">
+    /// <see langword="true"/> for <c>--announce-restart</c>: tell the peer our XMSG restarted.
+    /// </param>
+    /// <param name="resyncHard">
+    /// <see langword="true"/> for <c>--resync-hard</c>: zero our own counter as well when announcing.
+    /// </param>
+    /// <param name="syncFolder">
+    /// The <c>--sync</c> (or <c>--sync-root</c>) folder the daemon mirrors onto the machine, or null.
+    /// </param>
+    /// <param name="syncPullFolder">
+    /// The <c>--sync-pull</c> folder fetched files land in, or null.
+    /// </param>
+    /// <param name="syncUser">
+    /// The SINTRAN user directory the daemon writes to (<c>--sync-user</c>), or the root marker.
+    /// </param>
+    /// <param name="syncToNode">
+    /// The node the daemon carries files to (<c>--sync-to</c>), or null.
+    /// </param>
+    /// <param name="batchInput">
+    /// The <c>--append-batch</c> input file for one APPEND-REMOTE-BATCH letter to <c>*XFTRA</c>, or null.
+    /// </param>
+    /// <param name="batchOutput">
+    /// The <c>--append-batch-out</c> output file for that batch, or null.
+    /// </param>
+    /// <param name="requestLink">
+    /// <see langword="true"/> for <c>--request-link</c>: ask the peer to open the ND link again.
     /// </param>
     /// <param name="token">
     /// Stops the pump.
@@ -3328,15 +3353,6 @@ internal static class Program
     }
 
     /// <summary>
-    /// Formats a station address as the usual colon-separated hex, for logs.
-    /// </summary>
-    /// <param name="mac">
-    /// The address to format.
-    /// </param>
-    /// <returns>
-    /// The formatted address.
-    /// </returns>
-    /// <summary>
     /// Names a station by its ND system number when the address carries the ND vendor prefix,
     /// falling back to the raw address.
     /// </summary>
@@ -3357,6 +3373,15 @@ internal static class Program
         return Describe(mac);
     }
 
+    /// <summary>
+    /// Formats a station address as the usual colon-separated hex, for logs.
+    /// </summary>
+    /// <param name="mac">
+    /// The address to format.
+    /// </param>
+    /// <returns>
+    /// The formatted address.
+    /// </returns>
     private static string Describe(NdMacAddress mac)
     {
         Span<byte> bytes = stackalloc byte[NdMacAddress.Length];
@@ -3378,6 +3403,27 @@ internal static class Program
 
     // The route report now lives on XmsgNodeHost, so every transport formats it identically.
 
+    /// <summary>
+    /// Builds this runner's XSGSY routing table relative to the node number we are impersonating.
+    /// </summary>
+    /// <param name="node">
+    /// The system number this runner presents on the wire (the runner's <c>ownNode</c> argument).
+    /// </param>
+    /// <returns>
+    /// The routing-table entries, self-consistent for whichever node we run as.
+    /// </returns>
+    /// <remarks>
+    /// The table MUST be built relative to <paramref name="node"/>, otherwise the XSGSY server hands
+    /// node 100 a route that loops back through itself. Concretely, the old fixed table always carried
+    /// a "102 reachable Via 100" entry. When the runner is started AS node 102 that entry shadows the
+    /// correct "102 is Local (this is me)" self-entry - <see cref="InMemoryRoutingTable.TryLookup"/>
+    /// returns the first <c>System >= query</c>, which is the Via-100 entry - so 100's <c>li-rout</c>
+    /// reports <c>*->102->100->102...  *Loop suspected*</c> and connect-to routing breaks.
+    /// Rules:
+    ///  - Our own <paramref name="node"/> is ALWAYS Local (0 hops); never advertise a route to ourselves via anyone.
+    ///  - 100 is the direct HDLC link peer (Neighbour), unless we ourselves are 100.
+    ///  - 102 is the TAD responder reached through 100 (Via, 2 hops), unless we ourselves are 102.
+    /// </remarks>
     private static List<RoutingTableEntry> BuildRoutingEntries(ushort node)
     {
         List<RoutingTableEntry> entries = new List<RoutingTableEntry>(3);

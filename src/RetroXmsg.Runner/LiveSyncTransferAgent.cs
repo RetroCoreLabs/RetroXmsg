@@ -72,6 +72,10 @@ namespace RetroXmsg.Runner
         /// <param name="linkReady">
         /// Answers whether the link can carry a frame we originate.
         /// </param>
+        /// <param name="credentials">
+        /// The folded password per user, so a push can enter a directory that is not ours. A user
+        /// missing from it is pushed to with no password.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="nodeHost"/>, <paramref name="serverName"/> or
         /// <paramref name="linkReady"/> is null.
