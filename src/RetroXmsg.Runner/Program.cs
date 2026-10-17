@@ -1,3 +1,10 @@
+//
+// SPDX-License-Identifier: MIT
+// Copyright (c) 1985-2026 Ronny Hansen
+// RetroCore Labs — https://github.com/RetroCoreLabs
+// RetroXmsg - Accessing yesterday's Xmsg API with today's standards
+//
+
 // Live runner: connects the C# XMSG stack to a real nd100x --hdlc TCP bridge, brings up the
 // LAPB link, answers reachability / list-route, and (with a TAD responder) accepts connect-to.
 //
@@ -14,22 +21,21 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
 using RetroIO.Protocols.Xmsg;
 using RetroIO.Protocols.Xmsg.Codec;
+using RetroIO.Protocols.Xmsg.Ethernet;      // IEthernetBackend, EthernetBackendFactory, NdMacAddress
 using RetroIO.Protocols.Xmsg.ListRouting;
 using RetroIO.Protocols.Xmsg.Live;          // LapbLayer, TcpBridgeTransport, LiveNode (replaceable half)
 using RetroIO.Protocols.Xmsg.Live.Logging;  // RotatingFileWriter, TeeTextWriter, LogLevel
-using RetroXmsg.Runner;   // TopologyConfig / TopologyNode / LogConfig (this project)
 using RetroIO.Protocols.Xmsg.Live.Seam;     // LapbLayerAdapter (HDLC) + EthernetLink (COSMOS segment)
-using RetroIO.Protocols.Xmsg.Ethernet;      // IEthernetBackend, EthernetBackendFactory, NdMacAddress
 using RetroIO.Protocols.Xmsg.Ndfs;          // FolderFileStore (a Windows folder as an ND file store)
+using RetroIO.Protocols.Xmsg.Node;          // XmsgNode, FileResponderSequenceStore (portable half)
+using RetroIO.Protocols.Xmsg.Node.Seam;     // ILink, XmsgLayer, LinkXmsgTransport, BoundProtocolDetector
+using RetroIO.Protocols.Xmsg.Node.Services; // IXmsgServer (the registered-server contract)
+using RetroIO.Protocols.Xmsg.Packet;
 using RetroIO.Protocols.Xmsg.Servers.Fa;    // FaServer (*FA-SERVER, the COSMOS file server)
 using RetroIO.Protocols.Xmsg.Servers.Tad;   // TadServer, TadUser, TadUserDirectory
-using RetroIO.Protocols.Xmsg.Node;          // XmsgNode, FileResponderSequenceStore (portable half)
-using RetroIO.Protocols.Xmsg.Node.Services; // IXmsgServer (the registered-server contract)
-using RetroIO.Protocols.Xmsg.Node.Seam;     // ILink, XmsgLayer, LinkXmsgTransport, BoundProtocolDetector
-using RetroIO.Protocols.Xmsg.Packet;
+using RetroXmsg.Runner;   // TopologyConfig / TopologyNode / LogConfig (this project)
 
 // Wraps a TextWriter so every emitted line begins with a full wall-clock timestamp
 // (yyyy-MM-dd HH:mm:ss.fff) FOLLOWED BY " | " - the pipe is an explicit, machine-parseable

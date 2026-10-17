@@ -1,12 +1,17 @@
+//
+// SPDX-License-Identifier: MIT
+// Copyright (c) 1985-2026 Ronny Hansen
+// RetroCore Labs — https://github.com/RetroCoreLabs
+// RetroXmsg - Accessing yesterday's Xmsg API with today's standards
+//
+
 using System;
 using System.IO;
-
-using RetroIO.Protocols.Xmsg.Node.Seam;
 using RetroIO.Protocols.Xmsg;               // XmsgFrame
+using RetroIO.Protocols.Xmsg.Live;
+using RetroIO.Protocols.Xmsg.Node.Seam;
 using RetroIO.Protocols.Xmsg.Servers.Fa;
 using RetroIO.Protocols.Xmsg.Sync;
-
-using RetroIO.Protocols.Xmsg.Live;
 namespace RetroXmsg.Runner
 {
     /// <summary>

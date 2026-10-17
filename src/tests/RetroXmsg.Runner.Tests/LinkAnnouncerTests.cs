@@ -1,10 +1,15 @@
-using RetroXmsg.Runner;
-using RetroIO.Protocols.Xmsg.Node.Seam;
-
-using Xunit;
+//
+// SPDX-License-Identifier: MIT
+// Copyright (c) 1985-2026 Ronny Hansen
+// RetroCore Labs — https://github.com/RetroCoreLabs
+// RetroXmsg - Accessing yesterday's Xmsg API with today's standards
+//
 
 using RetroIO.Protocols.Xmsg;
 using RetroIO.Protocols.Xmsg.Live;
+using RetroIO.Protocols.Xmsg.Node.Seam;
+using RetroXmsg.Runner;
+using Xunit;
 namespace RetroXmsg.Runner.Tests
 {
     /// <summary>
