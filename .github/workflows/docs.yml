@@ -1,0 +1,78 @@
+name: Docs
+
+# Builds the DocFX API reference and publishes it to GitHub Pages on every push to main.
+# Repository Settings -> Pages -> Source must be "GitHub Actions".
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build DocFX site
+    # Windows, like build.yml: the same RetroIO pack step, and the same nuget.config, work here
+    # unchanged.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: src/global.json
+
+      # DocFX compiles the applications to read their comments, and they reference the RetroIO
+      # packages as 0.1.0-local.*, which exist only in a local folder feed. Build that feed exactly
+      # as build.yml does. RetroIO is public, so the checkout needs no token.
+      - name: Check out RetroIO
+        uses: actions/checkout@v7
+        with:
+          repository: RetroCoreLabs/RetroIO
+          path: RetroIO
+
+      - name: Pack RetroIO into the local feed
+        shell: pwsh
+        run: ./RetroIO/src/eng/publish-local.ps1 -Feed "$env:GITHUB_WORKSPACE/../localfeed"
+
+      - uses: actions/configure-pages@v6
+
+      - name: Install DocFX
+        shell: pwsh
+        run: |
+          dotnet tool install -g docfx
+          # Global tools land here; put it on the PATH for the next step rather than rely on the
+          # runner image having done so.
+          "$env:USERPROFILE\.dotnet\tools" >> $env:GITHUB_PATH
+
+      # DocFX restores and compiles every application itself to read the XML comments.
+      - name: Build site
+        working-directory: src
+        run: docfx docfx/docfx.json
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: src/docfx/_site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,5 @@
+# DocFX output - regenerated on every build
+_site/
+api/*.yml
+api/.manifest
+obj/

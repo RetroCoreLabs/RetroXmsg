@@ -16,4 +16,13 @@
   <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
+  <!-- Every shipped project writes its XML documentation, so a public member without a comment is
+       a build error (TreatWarningsAsErrors) rather than a hole in the API site that DocFX builds
+       from these comments. The .xml file itself is not published: a release is single-file
+       executables, and a loose file beside them is something nobody asked for. -->
+  <PropertyGroup Condition="!$(MSBuildProjectName.EndsWith('.Tests'))">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishDocumentationFile>false</PublishDocumentationFile>
+    <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>
+  </PropertyGroup>
 </Project>

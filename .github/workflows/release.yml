@@ -11,20 +11,19 @@ jobs:
   release:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: src/global.json
 
       # RetroXmsg references the RetroIO packages as 0.1.0-local.*, which exist only in a local
       # folder feed. Build them here, into the folder src/nuget.config points at (the parent of
-      # the workspace, beside it). RetroIO is private, so the checkout needs RETROIO_TOKEN: a
-      # fine-grained personal access token with read access to the RetroIO repository's contents.
+      # the workspace, beside it). RetroIO is public, so the checkout needs no token. When RetroIO
+      # is on nuget.org these two steps go, and Directory.Packages.props names the real version.
       - name: Check out RetroIO
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: RetroCoreLabs/RetroIO
-          token: ${{ secrets.RETROIO_TOKEN }}
           path: RetroIO
 
       - name: Pack RetroIO into the local feed
