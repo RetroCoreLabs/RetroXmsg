@@ -3,5 +3,7 @@
 - name: API Reference
   href: api/
   topicHref: api/index.md
+- name: RetroCore Labs
+  href: https://retrocorelabs.github.io/
 - name: GitHub
   href: https://github.com/RetroCoreLabs/RetroXmsg

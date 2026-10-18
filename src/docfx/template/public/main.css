@@ -38,3 +38,55 @@
 .navbar .navbar-nav .nav-link wbr {
   display: none;
 }
+
+/* The GitHub entry (the last menu entry) goes to the far right of the header, after the search
+   box and the theme switch, with the GitHub logo in front of the text. The menu list is
+   flattened so its last entry can be ordered after the other header items. */
+.navbar .navbar-nav {
+  display: contents;
+}
+
+.navbar .navbar-nav .nav-item:last-child {
+  order: 100;
+  margin-left: 0.5rem;
+}
+
+.navbar .nav-link[href^="https://github.com/"]::before {
+  font-family: bootstrap-icons;
+  content: "\f3ed";
+  font-size: 1.25rem;
+  vertical-align: -0.15rem;
+  margin-right: 0.4rem;
+}
+
+/* The RetroCore Labs entry: the organisation's profile picture, linking back to the front page
+   of retrocorelabs.github.io. It is the menu entry before GitHub, and goes to the right with it. */
+.navbar .navbar-nav .nav-item:has(> .nav-link[href="https://retrocorelabs.github.io/"]) {
+  order: 99;
+}
+
+.navbar .nav-link[href="https://retrocorelabs.github.io/"]::before {
+  content: "";
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.4rem;
+  vertical-align: -0.4rem;
+  border-radius: 4px;
+  background: url("RetroCoreLabs.png") center / contain no-repeat;
+}
+/* Between 768 and 1100 px the header has no room for the words as well: the GitHub and RetroCore
+   Labs entries show only their logos (the text stays in the page for screen readers). */
+@media (min-width: 768px) and (max-width: 1100px) {
+  .navbar .nav-link[href^="https://github.com/"],
+  .navbar .nav-link[href="https://retrocorelabs.github.io/"] {
+    font-size: 0;
+    padding-left: 0.3rem;
+    padding-right: 0.3rem;
+  }
+
+  .navbar .nav-link[href^="https://github.com/"]::before,
+  .navbar .nav-link[href="https://retrocorelabs.github.io/"]::before {
+    margin-right: 0;
+  }
+}
