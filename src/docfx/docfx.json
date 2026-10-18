@@ -25,11 +25,14 @@
       { "files": [ "api/**.yml", "api/index.md" ] },
       { "files": [ "*.md", "toc.yml" ] }
     ],
+    "resource": [ { "files": [ "images/**" ] } ],
     "output": "_site",
     "globalMetadata": {
       "_appName": "RetroXmsg",
       "_appTitle": "RetroXmsg API reference",
-      "_appFooter": "Copyright (c) 1985-2026 Ronny Hansen - MIT License - RetroCore Labs",
+      "_appLogoPath": "images/RetroXmsg.png",
+      "_appFaviconPath": "images/RetroXmsg.png",
+      "_appFooter": "Copyright (c) 1985-2026 Ronny Hansen - MIT License - RetroCore Labs - <a href=\"https://github.com/RetroCoreLabs/RetroXmsg\">GitHub</a>",
       "_enableSearch": true,
       "_disableContribution": false,
       "_gitContribute": {
@@ -37,7 +40,7 @@
         "branch": "main"
       }
     },
-    "template": [ "default", "modern" ],
+    "template": [ "default", "modern", "template" ],
     "postProcessors": [ "ExtractSearchIndex" ],
     "keepFileLink": false,
     "disableGitFeatures": false

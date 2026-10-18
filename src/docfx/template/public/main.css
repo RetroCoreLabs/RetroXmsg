@@ -1,0 +1,40 @@
+/* Header brand: the modern template does not size #logo. A PNG, ICO or an SVG that has only a
+   viewBox is drawn at its own size (90 to 157 px measured) and spills out of the 3.5 rem
+   header, pushing the site name over the menu. Sizing it here works for any icon file.
+   Found by measuring the live pages in a browser, 18 October 2026. */
+.navbar .navbar-brand #logo {
+  height: 2rem;
+  width: auto;
+  margin-right: 0.5rem;
+}
+
+/* Keep the site name from being squeezed, and a menu entry from breaking over two lines. */
+.navbar .navbar-brand {
+  flex-shrink: 0;
+}
+
+.navbar .nav-link {
+  white-space: nowrap;
+}
+
+/* Between 768 and 992 px the menu and the search box compete for the bar. Keep the menu at its
+   natural width and let the search box give way. */
+.navbar .navbar-nav {
+  flex-shrink: 0;
+}
+
+.navbar form#search {
+  min-width: 0;
+  flex: 1 1 8rem;
+}
+
+/* The template puts a wbr inside camel-case words, and Chromium breaks there even under
+   nowrap, so "GitHub" is drawn "Git" / "Hub" when the menu is squeezed. Remove the break
+   point and keep each entry at its natural width. */
+.navbar .navbar-nav .nav-item {
+  flex-shrink: 0;
+}
+
+.navbar .navbar-nav .nav-link wbr {
+  display: none;
+}

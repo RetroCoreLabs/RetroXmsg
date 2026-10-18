@@ -8,7 +8,7 @@ sessions.
 [![release](https://img.shields.io/github/v/release/RetroCoreLabs/RetroXmsg)](https://github.com/RetroCoreLabs/RetroXmsg/releases)
 [![licence](https://img.shields.io/github/license/RetroCoreLabs/RetroXmsg)](LICENSE)
 [![downloads](https://img.shields.io/github/downloads/RetroCoreLabs/RetroXmsg/total)](https://github.com/RetroCoreLabs/RetroXmsg/releases)
-[Applications](#the-two-applications) · [Prerequisites](#prerequisites) · [Two traps first](#two-traps-before-you-start) · [About XMSG](#about-xmsg) · [API reference](https://retrocorelabs.github.io/retroxmsg/)
+[Applications](#the-two-applications) · [Prerequisites](#prerequisites) · [Two traps first](#two-traps-before-you-start) · [About XMSG](#about-xmsg) · [API reference](https://retrocorelabs.github.io/RetroXmsg/)
 
 <!-- A 5-15 second recording: xmsgrunner connecting to a SINTRAN machine and pulling a file.
      Under 10 MB. Uncomment when the capture exists.

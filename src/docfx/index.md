@@ -1,7 +1,7 @@
 # RetroXmsg
 
 Talk to a Norsk Data machine. Two applications built on the XMSG packages from
-[RetroIO](https://retrocorelabs.github.io/retroio/): a hub that links XMSG nodes over TCP, and a
+[RetroIO](https://retrocorelabs.github.io/RetroIO/): a hub that links XMSG nodes over TCP, and a
 runner that drives the C# XMSG stack against a real SINTRAN III machine - file transfer, folder
 synchronisation, chat and terminal sessions.
 
@@ -26,6 +26,6 @@ src\publish\win-x64\xmsgrunner.exe --self 103 --for 60
 These are applications, so this reference covers the types they expose to each other and to
 their tests. The protocol itself - the codec, the node and the servers - is documented with the
 `RetroIO.Protocols.Xmsg.*` packages in the
-[RetroIO API reference](https://retrocorelabs.github.io/retroio/).
+[RetroIO API reference](https://retrocorelabs.github.io/RetroIO/).
 
 See the [API reference](api/index.md) for every namespace, type and member.

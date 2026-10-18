@@ -29,4 +29,4 @@ them.
 
 ## Live site
 
-<https://retrocorelabs.github.io/retroxmsg/>
+<https://retrocorelabs.github.io/RetroXmsg/>
